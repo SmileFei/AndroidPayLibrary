@@ -8,9 +8,6 @@
 #idea
 .idea/
 
-#libs
-libs
-
 *.iws
 
 # Built application files

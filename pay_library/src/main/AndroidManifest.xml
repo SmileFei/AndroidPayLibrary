@@ -8,6 +8,22 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <!-- alipay sdk end 需要权限	  -->
+
+    <!--银联权限 begin -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <!--<!— 如果选择智能卡方式(即sdkPro)集成，需要额外定义以下权限 –>-->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="org.simalliance.openmobileapi.SMARTCARD" />
+    <!--银联权限 end -->
+
+
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
@@ -25,6 +41,24 @@
             android:exported="false"
             android:screenOrientation="behind"></activity>
         <!-- alipay sdk end -->
+
+        <!--银联支付app begin -->
+        <activity
+            android:name="com.unionpay.uppay.PayActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:excludeFromRecents="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.unionpay.UPPayWapActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <!--银联支付app end -->
+
     </application>
 
 </manifest>

@@ -21,5 +21,12 @@
         android:layout_marginTop="10dp"
         android:text="微信支付" />
 
+    <Button
+        android:id="@+id/btn_union_pay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="银联支付" />
+
 
 </LinearLayout>

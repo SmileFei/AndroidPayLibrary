@@ -1,18 +1,34 @@
 package com.android.paylibrary;
 
-import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-import com.android.pay_library.AliPayAPI;
 import com.android.pay_library.AliPayFromServer;
-import com.android.pay_library.AliPayReq;
-import com.android.pay_library.AliPayReq2;
 import com.android.pay_library.PayAPI;
 import com.android.pay_library.WechatPayReq;
+import com.unionpay.UPPayAssistEx;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
 public class MainActivity extends AppCompatActivity {
+
+
+    //mMode参数解释： "00" - 启动银联正式环境 "01" - 连接银联测试环境
+
+    private final String mMode = "01";
+    private static final String TN_URL_01 = "http://101.231.204.84:8091/sim/getacptn";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +69,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-    }
+        findViewById(R.id.btn_union_pay).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new getAcpTNThread().start();
+            }
+        });
 
+    }
 
     /**
      * 微信支付Test
@@ -99,92 +121,122 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    /**
-     * 支付宝支付测试
-     */
-    public void testAliPay() {
-        String rsa_private = "";
-        String rsa_public = "";
-        String partner = "";
-        String seller = "";
 
-        Activity activity = this;
-        String outTradeNo = "";
-        String price = "";
-        String orderSubject = "";
-        String orderBody = "";
-        String callbackUrl = "";
+    class getAcpTNThread extends Thread {
+        @Override
+        public void run() {
+            super.run();
+            String tn = null;
+            InputStream is;
+            try {
+                String url = TN_URL_01;
+                URL myURL = new URL(url);
+                URLConnection ucon = myURL.openConnection();
+                ucon.setConnectTimeout(120000);
+                is = ucon.getInputStream();
+                int i = -1;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while ((i = is.read()) != -1) {
+                    baos.write(i);
+                }
+                tn = baos.toString();
+                is.close();
+                baos.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-        AliPayAPI.Config config = new AliPayAPI.Config.Builder()
-                .setRsaPrivate(rsa_private) //设置私钥
-                .setRsaPublic(rsa_public)//设置公钥
-                .setPartner(partner) //设置商户
-                .setSeller(seller) //设置商户收款账号
-                .create();
+            Message msg = mHandler.obtainMessage();
+            msg.obj = tn;
+            mHandler.sendMessage(msg);
+        }
+    }
 
-        AliPayReq aliPayReq = new AliPayReq.Builder()
-                .with(activity)//Activity实例
-                .apply(config)//支付宝支付通用配置
-                .setOutTradeNo(outTradeNo)//设置唯一订单号
-                .setPrice(price)//设置订单价格
-                .setSubject(orderSubject)//设置订单标题
-                .setBody(orderBody)//设置订单内容 订单详情
-                .setCallbackUrl(callbackUrl)//设置回调地址
-                .create();//
-        AliPayAPI.getInstance().apply(config).sendPayReq(aliPayReq);
+    Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            String tn = "";
+            if (msg.obj == null || ((String) msg.obj).length() == 0) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("错误提示");
+                builder.setMessage("网络连接失败,请重试!");
+                builder.setNegativeButton("确定",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                builder.create().show();
+            } else {
+                tn = (String) msg.obj;
+                //步骤2：通过银联工具类启动支付插件
+                UPPayAssistEx.startPay(MainActivity.this, null, null, tn, mMode);
+            }
+        }
 
-        PayAPI.getInstance().sendPayRequest(aliPayReq);
+    };
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // 处理银联手机支付控件返回的支付结果
+        if (data == null) {
+            return;
+        }
+        String msg = "";
+        /*
+         * 支付控件返回字符串:success、fail、cancel 分别代表支付成功，支付失败，支付取消
+         */
+        String str = data.getExtras().getString("pay_result");
+        if (str.equalsIgnoreCase("success")) {
+            // 如果想对结果数据验签，可使用下面这段代码，但建议不验签，直接去商户后台查询交易结果
+            // result_data结构见c）result_data参数说明
+            if (data.hasExtra("result_data")) {
+                String result = data.getExtras().getString("result_data");
+                try {
+                    JSONObject resultJson = new JSONObject(result);
+                    String sign = resultJson.getString("sign");
+                    String dataOrg = resultJson.getString("data");
+                    // 此处的verify建议送去商户后台做验签
+                    // 如要放在手机端验，则代码必须支持更新证书
+                    boolean ret = verify(dataOrg, sign, mMode);
+                    if (ret) {
+                        // 验签成功，显示支付结果
+                        msg = "支付成功！";
+                    } else {
+                        // 验签失败
+                        msg = "支付失败！";
+                    }
+                } catch (JSONException e) {
+                }
+            }
+            // 结果result_data为成功时，去商户后台查询一下再展示成功
+            msg = "支付成功！";
+        } else if (str.equalsIgnoreCase("fail")) {
+            msg = "支付失败！";
+        } else if (str.equalsIgnoreCase("cancel")) {
+            msg = "用户取消了支付";
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("支付结果通知");
+        builder.setMessage(msg);
+        builder.setInverseBackgroundForced(true);
+        // builder.setCustomTitle();
+        builder.setNegativeButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
     }
 
 
-    /**
-     * 安全的支付宝支付测试
-     */
-    public void testAliPaySafely() {
-        String partner = "";
-        String seller = "";
-
-        Activity activity = this;
-        String outTradeNo = "";
-        String price = "";
-        String orderSubject = "";
-        String orderBody = "";
-        String callbackUrl = "";
-
-
-        String rawAliOrderInfo = new AliPayReq2.AliOrderInfo()
-                .setPartner(partner) //商户PID || 签约合作者身份ID
-                .setSeller(seller)  // 商户收款账号 || 签约卖家支付宝账号
-                .setOutTradeNo(outTradeNo) //设置唯一订单号
-                .setSubject(orderSubject) //设置订单标题
-                .setBody(orderBody) //设置订单内容
-                .setPrice(price) //设置订单价格
-                .setCallbackUrl(callbackUrl) //设置回调链接
-                .createOrderInfo(); //创建支付宝支付订单信息
-
-
-        //TODO 这里需要从服务器获取用商户私钥签名之后的订单信息
-        String signAliOrderInfo = getSignAliOrderInfoFromServer(rawAliOrderInfo);
-
-        AliPayReq2 aliPayReq = new AliPayReq2.Builder()
-                .with(activity)//Activity实例
-                .setRawAliPayOrderInfo(rawAliOrderInfo)//set the ali pay order info
-                .setSignedAliPayOrderInfo(signAliOrderInfo) //set the signed ali pay order info
-                .create()//
-                .setOnAliPayListener(null);//
-        AliPayAPI.getInstance().sendPayReq(aliPayReq);
-
-        PayAPI.getInstance().sendPayRequest(aliPayReq);
+    private boolean verify(String msg, String sign64, String mode) {
+        // 此处的verify，商户需送去商户后台做验签
+        return true;
     }
-
-    /**
-     * 获取签名后的支付宝订单信息  (用商户私钥RSA加密之后的订单信息)
-     *
-     * @param rawAliOrderInfo
-     * @return
-     */
-    private String getSignAliOrderInfoFromServer(String rawAliOrderInfo) {
-        return null;
-    }
-
 }
