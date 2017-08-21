@@ -2,7 +2,23 @@
 
 ## 安卓项目支付依赖框架
 
-##使用说明：
+##导入说明(import)：
+
+在build.gradle直接引用 :
+
+    dependencies {
+        compile 'com.github.SmileFei:AndroidPayLibrary:v2.0.0'
+    }
+    注意在Project的build.gradle中添加如下代码
+    allprojects {
+        repositories {
+            jcenter()
+            maven { url 'https://jitpack.io' }
+        }
+
+
+
+##使用说明(Usage)：
 
 1、支付宝
 
