@@ -44,27 +44,57 @@
 
     public void weChatPay() {
         //1.创建微信支付请求
-        WechatPayReq wechatPayReq = new WechatPayReq.Builder()
-                .with(this) //activity实例
-                .setAppId(appid) //微信支付AppID
-                .setPartnerId(partnerid)//微信支付商户号
-                .setPrepayId(prepayid)//预支付码
-                .setNonceStr(noncestr)
-                .setTimeStamp(timestamp)//时间戳
-                .setSign(sign)//签名
-                .create();
+                WechatPayReq wechatPayReq = new WechatPayReq.Builder()
+                        .with(this) //activity实例
+                        .setAppId(response.getAppId()) //微信支付AppID
+                        .setPartnerId(response.getPartnerId())//微信支付商户号
+                        .setPrepayId(response.getPrepayId())//预支付码
+                        .setNonceStr(response.getNonceStr())
+                        .setPackageValue(response.getPackageStr())
+                        .setTimeStamp(response.getTimeStamp())//时间戳
+                        .setSign(response.getSign())//签名
+                        .create();
         //2.发送微信支付请求
-        PayAPI.getInstance().sendPayRequest(wechatPayReq);
+                PayAPI.getInstance().sendPayRequest(wechatPayReq);
         //3.关于微信支付的回调
-        wechatPayReq.setOnWechatPayListener(new WechatPayReq.OnWechatPayListener() {
-            @Override
-            public void onPaySuccess(int i) {
-            }
-            @Override
-            public void onPayFailure(int i) {
-            }
-        });
+            在“App包名.wxapi”的package中新建WXPayEntryActivity 如下所示，在onResp()方法中执行回调
     }
+
+            public class WXPayEntryActivity extends Activity implements IWXAPIEventHandler {
+                            private static final String TAG = "==============WXPayEntryActivity==============";
+                            private IWXAPI api;
+                            @Override
+                            public void onCreate(Bundle savedInstanceState) {
+                                super.onCreate(savedInstanceState);
+                                api = WXAPIFactory.createWXAPI(this, Constant.APP_ID);
+                                api.handleIntent(getIntent(), this);
+                            }
+
+                            @Override
+                            protected void onNewIntent(Intent intent) {
+                                super.onNewIntent(intent);
+                                setIntent(intent);
+                                api.handleIntent(intent, this);
+                            }
+
+                            @Override
+                            public void onReq(BaseReq req) {
+                                BaseReq abc = req;
+                            }
+
+                            @Override
+                            public void onResp(BaseResp resp) {
+                                Log.e(TAG, "checkArgs=" + resp.checkArgs());
+                                if (resp.getType() == ConstantsAPI.COMMAND_PAY_BY_WX) {
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                                        builder.setTitle("提示");
+                                        builder.setMessage("微信支付结果：" + "errCode=" + resp.errCode + "; errStr=" + resp.errStr);
+                                        builder.show();
+                                }
+                            }
+                        }
+
+
 
 3、银联支付
 
