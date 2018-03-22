@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_wechart_pay).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                testWechatPay();
+                weChatPay();
             }
         });
 
@@ -78,48 +78,30 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    /**
-     * 微信支付Test
-     */
-    public void testWechatPay() {
-        String appid = "";
-        String partnerid = "";
-        String prepayid = "";
-        String noncestr = "";
-        String timestamp = "";
-        String sign = "";
+    public void weChatPay() {
+        String AppId = "";       //微信支付AppID
+        String PartnerId = "";   //微信支付商户号
+        String PrepayId = "";    //预支付码
+        String NonceStr = "";    //时间戳
+        String PackageStr = "";
+        String TimeStamp = "";
+        String Sign = "";        //签名
+
+
+        //1.创建微信支付请求
         WechatPayReq wechatPayReq = new WechatPayReq.Builder()
                 .with(this) //activity实例
-                .setAppId(appid) //微信支付AppID
-                .setPartnerId(partnerid)//微信支付商户号
-                .setPrepayId(prepayid)//预支付码
-//								.setPackageValue(wechatPayReq.get)//"Sign=WXPay"
-                .setNonceStr(noncestr)
-                .setTimeStamp(timestamp)//时间戳
-                .setSign(sign)//签名
+                .setAppId(AppId)
+                .setPartnerId(PartnerId)
+                .setPrepayId(PrepayId)
+                .setNonceStr(NonceStr)
+                .setPackageValue(PackageStr)
+                .setTimeStamp(TimeStamp)
+                .setSign(Sign)
                 .create();
-
+        //2.发送微信支付请求
         PayAPI.getInstance().sendPayRequest(wechatPayReq);
-//								.setOnWechatPayListener(new OnWechatPayListener() {
-//
-//									@Override
-//									public void onPaySuccess(int errorCode) {
-//										ToastUtil.show(mContext, "支付成功" + errorCode);
-//
-//									}
-//
-//									@Override
-//									public void onPayFailure(int errorCode) {
-//										ToastUtil.show(mContext, "支付失败" + errorCode);
-//
-//									}
-//								});
-//        WechatPayAPI.getInstance().sendPayReq(wechatPayReq);
-
-        PayAPI.getInstance().sendPayRequest(wechatPayReq);
-
     }
-
 
 
     class getAcpTNThread extends Thread {

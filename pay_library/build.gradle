@@ -42,8 +42,4 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.4.0'
-    compile files('libs/alipaySingle-20170510.jar')
-    compile files('libs/libammsdk.jar')
-    compile files('libs/UPPayAssistEx.jar')
-    compile files('libs/UPPayPluginExPro.jar')
 }
