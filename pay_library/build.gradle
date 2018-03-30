@@ -1,9 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.novoda.bintray-release'
 
-
-group = 'com.github.SmileFei'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -29,17 +26,10 @@ android {
     }
 }
 
-publish {
-    userOrg = 'smilefei'      //bintray注册的用户名
-    groupId = 'com.gomorelibrary'         //compile引用时的第1部分groupId
-    artifactId = 'AndroidPay'     //compile引用时的第2部分项目名
-    publishVersion = '1.0.0'    //compile引用时的第3部分版本号
-    desc = 'This is android pay library '
-    website = 'https://github.com/SmileFei/AndroidPayLibrary'
-}
-
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.4.0'
+    //微信sdk
+    compile 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:+'
 }

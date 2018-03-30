@@ -7,25 +7,12 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:2.2.3'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
-        classpath 'com.novoda:bintray-release:+'
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
     }
 }
 
 allprojects {
     repositories {
         jcenter()
-    }
-    //加上这些
-    tasks.withType(Javadoc) {
-        options.addStringOption('Xdoclint:none', '-quiet')
-        options{ encoding "UTF-8"
-            charSet 'UTF-8'
-            links "http://docs.oracle.com/javase/7/docs/api"
-        }
     }
 }
 
