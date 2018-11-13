@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
                 new getAcpTNThread().start();
             }
         });
-
     }
 
     public void weChatPay() {
@@ -167,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
         if (data == null) {
             return;
         }
+
         String msg = "";
         /*
          * 支付控件返回字符串:success、fail、cancel 分别代表支付成功，支付失败，支付取消
