@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/GomorePayLibrary.iml" filepath="$PROJECT_DIR$/GomorePayLibrary.iml" />
+      <module fileurl="file://$PROJECT_DIR$/AndroidPayLibrary.iml" filepath="$PROJECT_DIR$/AndroidPayLibrary.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/pay_library/pay_library.iml" filepath="$PROJECT_DIR$/pay_library/pay_library.iml" />
     </modules>
