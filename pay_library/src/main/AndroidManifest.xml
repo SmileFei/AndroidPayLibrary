@@ -16,11 +16,13 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.NFC" />
 
     <!--<!— 如果选择智能卡方式(即sdkPro)集成，需要额外定义以下权限 –>-->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="org.simalliance.openmobileapi.SMARTCARD" />
+    <uses-feature android:name="android.hardware.nfc.hce" />
     <!--银联权限 end -->
 
 
@@ -44,6 +46,10 @@
         <!-- alipay sdk end -->
 
         <!--银联支付app begin -->
+        <uses-library
+            android:name="org.simalliance.openmobileapi"
+            android:required="false" />
+
         <activity
             android:name="com.unionpay.uppay.PayActivity"
             android:configChanges="orientation|keyboardHidden"
